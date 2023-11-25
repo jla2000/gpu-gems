@@ -1,4 +1,13 @@
-/target
 result
 zig-out/
 zig-cache/
+out/
+.cache/
+compile_commands.json
+
+
+# Added by cargo
+#
+# already existing elements were commented out
+
+#/target

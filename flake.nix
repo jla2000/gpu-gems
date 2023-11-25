@@ -13,22 +13,35 @@
       pkgs = import nixpkgs { inherit system; };
     in
     {
-      packages.${system}.default = pkgs.stdenv.mkDerivation {
+      packages.${system}.default = pkgs.clangStdenv.mkDerivation rec {
         name = "gpu-gems";
-        nativeBuildInputs = with pkgs; [
-          zig
+        buildInputs = with pkgs; [
+          libxkbcommon
+          xorg.libX11
+          xorg.libXrandr
+          xorg.libXcursor
+          xorg.libXi
+          wayland
+          libGL
+          libglvnd
           glfw
           glew
-          libGL
+          glm
         ];
+        nativeBuildInputs = with pkgs; [
+          cmake
+          clang-tools
+        ];
+        LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath buildInputs}";
+        CPATH = pkgs.lib.makeSearchPathOutput "dev" "include" buildInputs;
         src = self;
         buildPhase = ''
-          export XDG_CACHE_HOME=xdg_cache
-          zig build
+          cmake .
+          cmake --build . --target gpu-gems
         '';
         installPhase = ''
           mkdir -p $out/bin
-          cp ./zig-out/bin/gpu-gems $out/bin
+          mv gpu-gems $out/bin
         '';
       };
     };
