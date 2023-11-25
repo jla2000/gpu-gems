@@ -29,6 +29,7 @@
           glm
         ];
         nativeBuildInputs = with pkgs; [
+          neovim
           cmake
           clang-tools
         ];
