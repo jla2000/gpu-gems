@@ -2,11 +2,34 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "shader.h"
 #include "watcher.h"
 
 GLuint program_id;
+GLuint projection_id;
+GLuint view_id;
+GLuint model_id;
+
+glm::mat4 projection;
+glm::mat4 view;
+glm::mat4 model;
+
+void UploadCameraMatrices() {
+  glUniformMatrix4fv(projection_id, 1, GL_FALSE, &projection[0][0]);
+  glUniformMatrix4fv(view_id, 1, GL_FALSE, &view[0][0]);
+  glUniformMatrix4fv(model_id, 1, GL_FALSE, &model[0][0]);
+}
+
+void SetupProjection(int width, int height) {
+  projection = glm::perspective(glm::radians(45.0f),
+                                (float)width / (float)height, 0.1f, 100.0f);
+}
+
+void SetupView(glm::vec3 position, glm::vec3 target) {
+  view = glm::lookAt(position, target, glm::vec3{0, 1, 0});
+}
 
 void LoadProgram() {
   program_id = CreateShaderProgram({
@@ -14,11 +37,18 @@ void LoadProgram() {
       CreateShader(GL_FRAGMENT_SHADER, "shaders/triangle.frag"),
   });
 
+  projection_id = glGetUniformLocation(program_id, "projection");
+  view_id = glGetUniformLocation(program_id, "view");
+  model_id = glGetUniformLocation(program_id, "model");
+
   glUseProgram(program_id);
+  UploadCameraMatrices();
 }
 
 void OnResize(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
+  SetupProjection(width, height);
+  UploadCameraMatrices();
 }
 
 void OnShaderFilesChanged() {
@@ -55,6 +85,10 @@ int main() {
   }
   glfwMakeContextCurrent(window);
   glfwSetWindowSizeCallback(window, OnResize);
+
+  SetupView({3, 3, 3}, {0, 0, 0});
+  SetupProjection(800, 600);
+  model = glm::mat4(1.0f);
 
   if (glewInit() != GLEW_OK) {
     std::cerr << "Failed to initialize GLEW." << std::endl;

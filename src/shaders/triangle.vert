@@ -2,6 +2,10 @@
 
 layout(location = 0) in vec3 vertex_position;
 
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+
 out vec3 vertex_color;
 
 const vec3 colors[] = vec3[](
@@ -11,6 +15,6 @@ const vec3 colors[] = vec3[](
 );
 
 void main() {
-  gl_Position = vec4(vertex_position, 1.0);
+  gl_Position = projection * view * model * vec4(vertex_position, 1.0);
   vertex_color = colors[gl_VertexID];
 }
