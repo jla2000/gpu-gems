@@ -8,7 +8,7 @@ public:
   Watcher(std::string const &path);
   ~Watcher();
 
-  bool FilesChanged() const;
+  bool Poll() const;
 
 private:
   int inotify_handle;

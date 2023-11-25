@@ -22,7 +22,7 @@ Watcher::~Watcher() {
   close(inotify_handle);
 }
 
-bool Watcher::FilesChanged() const {
+bool Watcher::Poll() const {
   pollfd poll_fd{inotify_handle, POLLIN, 0};
   if (poll(&poll_fd, 1, 0) > 0) {
     char event_buffer[(sizeof(inotify_event) + 16) * 16];
