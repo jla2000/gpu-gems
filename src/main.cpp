@@ -2,12 +2,9 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <poll.h>
-#include <sys/inotify.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #include "shader.h"
+#include "watcher.h"
 
 int main() {
   glfwSetErrorCallback([](int, char const *error_message) {
@@ -48,18 +45,7 @@ int main() {
   };
 
   GLuint program_id = LoadProgram();
-
-  int watcher = inotify_init();
-  if (watcher < 0) {
-    std::cerr << "Failed to start watcher" << std::endl;
-    return 1;
-  }
-
-  int watch = inotify_add_watch(watcher, "shaders", IN_MODIFY);
-  if (watch < 0) {
-    std::cerr << "Failed to watch shaders" << std::endl;
-    return 1;
-  }
+  Watcher shader_watcher{"shaders"};
 
   glClearColor(1.0, 0.0, 0.0, 1.0);
 
@@ -69,21 +55,12 @@ int main() {
 
     glfwPollEvents();
 
-    pollfd poll_fd{watcher, POLLIN, 0};
-    if (poll(&poll_fd, 1, 0) > 0) {
-      char event_buffer[(sizeof(inotify_event) + 16) * 16];
-      int files_changed = read(watcher, event_buffer, sizeof(event_buffer));
-
-      if (files_changed > 0) {
-        std::cout << "Shader files changed. Reloading..." << std::endl;
-        glDeleteProgram(program_id);
-        program_id = LoadProgram();
-      }
+    if (shader_watcher.FilesChanged()) {
+      std::cout << "Shader files changed. Reloading..." << std::endl;
+      glDeleteProgram(program_id);
+      program_id = LoadProgram();
     }
   }
-
-  inotify_rm_watch(watcher, watch);
-  close(watcher);
 
   glfwTerminate();
 

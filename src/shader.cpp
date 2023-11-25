@@ -5,14 +5,12 @@
 
 #include "shader.h"
 
-// Parse a #include directive and return absolute file path
 std::string ParseInclude(std::string const &filename, std::string const &line) {
   std::string basename = std::filesystem::path(filename).parent_path().string();
   std::string includedFile = line.substr(line.find('"') + 1, std::string::npos);
   return basename + '/' + includedFile.substr(0, includedFile.size() - 1);
 }
 
-// Load source code of a shader file
 std::string LoadShader(std::string const &filename) {
   std::ifstream ifs{filename};
 
@@ -24,7 +22,6 @@ std::string LoadShader(std::string const &filename) {
   std::string line;
 
   while (std::getline(ifs, line)) {
-    // Basic shader preprocessor
     if (line.starts_with("#include")) {
       line = LoadShader(ParseInclude(filename, line));
     }
@@ -88,6 +85,7 @@ GLuint CreateShaderProgram(std::vector<GLuint> const shaders) {
     glAttachShader(program_id, shader_id);
   }
 
+  std::cout << "Linking program" << std::endl;
   glLinkProgram(program_id);
   CheckLinkStatus(program_id);
 
