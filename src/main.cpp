@@ -1,3 +1,5 @@
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/trigonometric.hpp>
 #include <iostream>
 
 #include <GL/glew.h>
@@ -118,6 +120,8 @@ int main() {
   LoadProgram();
   Watcher shader_watcher{"shaders"};
 
+  float lastFrame = glfwGetTime();
+
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -127,6 +131,14 @@ int main() {
 
     if (shader_watcher.Poll())
       OnShaderFilesChanged();
+
+    float currentFrame = glfwGetTime();
+    float deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
+    float amount = deltaTime * 100.0f;
+    model = glm::rotate(model, glm::radians(amount), {0, 1, 0});
+    UploadCameraMatrices();
   }
 
   glfwTerminate();
