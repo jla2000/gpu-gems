@@ -23,15 +23,22 @@ vec3 calculate_normal() {
 void main() {
   vec3 object_color = vec3(0, 0.5, 0.8);
   vec3 light_color = vec3(1, 1, 1);
-  vec3 light_position = vec3(10, 100, 10);
+  vec3 light_position = vec3(100, 100, 10);
   vec3 light_direction = normalize(light_position - position);
 
   vec3 normal = calculate_normal();
 
-  float ambient = 0.1;
-  float diffuse = max(dot(normal, light_direction), 0);
+  vec3 ambient = vec3(0.1);
+  vec3 diffuse = vec3(max(dot(normal, light_direction), 0));
 
-  vec3 result = (ambient + diffuse) * object_color;
+  vec3 camera_pos = vec3(5, 5, 5);
+  float specular_strength = 0.8;
+  vec3 view_dir = normalize(camera_pos - position);
+  vec3 reflect_dir = reflect(-light_direction, normal);
+  float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);
+  vec3 specular = specular_strength * spec * light_color;
+
+  vec3 result = (ambient + diffuse + specular) * object_color;
 
   color = vec4(result, 1);
 }
