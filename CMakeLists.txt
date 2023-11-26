@@ -4,8 +4,9 @@ project(gpu-gems)
 
 set(CMAKE_CXX_STANDARD 20)
 
-configure_file(src/shaders/triangle.vert ${CMAKE_CURRENT_BINARY_DIR}/shaders/triangle.vert)
-configure_file(src/shaders/triangle.frag ${CMAKE_CURRENT_BINARY_DIR}/shaders/triangle.frag)
+configure_file(src/shaders/quad.vert ${CMAKE_CURRENT_BINARY_DIR}/shaders/quad.vert)
+configure_file(src/shaders/quad.frag ${CMAKE_CURRENT_BINARY_DIR}/shaders/quad.frag)
+configure_file(src/shaders/quad.geom ${CMAKE_CURRENT_BINARY_DIR}/shaders/quad.geom)
 
 set(
   SOURCE_FILES 

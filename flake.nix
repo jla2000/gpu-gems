@@ -27,6 +27,7 @@
           glfw
           glew
           glm
+          assimp
         ];
         nativeBuildInputs = with pkgs; [
           neovim
