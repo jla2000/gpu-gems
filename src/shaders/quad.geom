@@ -7,6 +7,28 @@ layout(triangle_strip, max_vertices=256) out;
 
 uniform uint sub_divisions;
 uniform mat4 view_projection;
+uniform float time;
+
+out vec3 position;
+
+vec4 offset(vec4 vertex) {
+  vec2 D = normalize(vec2(3, 1));
+
+  float l = 0.4;
+  float w = 2.0 / l;
+  float a = 0.1;
+  float phase = 0.7f * w;
+
+  vertex.y = a * sin(dot(D, vertex.xz) * w + time * phase);
+  
+  return vertex;
+}
+
+void push_vertex(vec4 vertex) {
+  gl_Position = view_projection * vertex;
+  position = vertex.xyz;
+  EmitVertex();
+}
 
 void main() {
   vec4 v0 = gl_in[0].gl_Position;
@@ -20,17 +42,10 @@ void main() {
   float z = v0.z;
 
   for (int i = 0; i < sub_divisions * sub_divisions; ++i) {
-    gl_Position = view_projection * vec4(x, 0, z, 1);
-    EmitVertex();
-
-    gl_Position = view_projection * vec4(x, 0, z + dz, 1);
-    EmitVertex();
-
-    gl_Position = view_projection * vec4(x + dx, 0, z, 1);
-    EmitVertex();
-
-    gl_Position = view_projection * vec4(x + dx, 0, z + dz, 1);
-    EmitVertex();
+    push_vertex(offset(vec4(x, 0, z, 1)));
+    push_vertex(offset(vec4(x, 0, z + dz, 1)));
+    push_vertex(offset(vec4(x + dx, 0, z, 1)));
+    push_vertex(offset(vec4(x + dx, 0, z + dz, 1)));
 
     EndPrimitive();
 

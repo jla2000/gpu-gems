@@ -18,6 +18,7 @@ GLuint program_id;
 GLuint view_projection_id;
 GLuint models_id;
 GLuint sub_divisions_id;
+GLuint time_id;
 
 glm::mat4 projection;
 glm::mat4 view;
@@ -39,6 +40,7 @@ void UpdateProgramUniforms() {
   glUniformMatrix4fv(view_projection_id, 1, GL_FALSE, &view_projection[0][0]);
   glUniformMatrix4fv(models_id, 16, GL_FALSE, &models[0][0][0]);
   glUniform1ui(sub_divisions_id, sub_divisions);
+  glUniform1f(time_id, glfwGetTime());
 }
 
 void SetupProjection(int width, int height) {
@@ -60,6 +62,7 @@ void LoadProgram() {
   models_id = glGetUniformLocation(program_id, "models");
   view_projection_id = glGetUniformLocation(program_id, "view_projection");
   sub_divisions_id = glGetUniformLocation(program_id, "sub_divisions");
+  time_id = glGetUniformLocation(program_id, "time");
 
   glUseProgram(program_id);
   UpdateProgramUniforms();
@@ -151,7 +154,17 @@ int main() {
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quad_indices), quad_indices,
                GL_STATIC_DRAW);
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  // Show lines
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+  // Depth testing
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+
+  // Culling
+  // glEnable(GL_CULL_FACE);
+  // glFrontFace(GL_CW);
+  // glCullFace(GL_FRONT);
 
   LoadProgram();
   Watcher shader_watcher{"shaders"};
