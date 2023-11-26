@@ -1,15 +1,15 @@
-#include <glm/ext/matrix_float4x4.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/trigonometric.hpp>
 #include <iostream>
+#include <stdexcept>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
+#include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <stdexcept>
+#include <glm/trigonometric.hpp>
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
+#include <imgui/imgui.h>
 
 #include "shader.h"
 #include "watcher.h"
@@ -107,6 +107,13 @@ int main() {
     return 1;
   }
   glfwMakeContextCurrent(window);
+
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO &io{ImGui::GetIO()};
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init();
+
   glfwSetWindowSizeCallback(window, OnResize);
 
   SetupView({5, 5, 5}, {0, 0, 0});
@@ -155,30 +162,38 @@ int main() {
                GL_STATIC_DRAW);
 
   // Show lines
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // Depth testing
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
 
   // Culling
-  // glEnable(GL_CULL_FACE);
-  // glFrontFace(GL_CW);
-  // glCullFace(GL_FRONT);
+  glEnable(GL_CULL_FACE);
+  glFrontFace(GL_CW);
+  glCullFace(GL_FRONT);
 
   LoadProgram();
   Watcher shader_watcher{"shaders"};
 
   while (!glfwWindowShouldClose(window)) {
-    UpdateDeltaTime();
+    glfwPollEvents();
 
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    ImGui::ShowDemoWindow();
+
+    UpdateDeltaTime();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDrawElementsInstanced(GL_TRIANGLES,
                             sizeof(quad_indices) / sizeof(GLfloat),
                             GL_UNSIGNED_INT, nullptr, 16);
 
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
     glfwSwapBuffers(window);
-    glfwPollEvents();
 
     if (shader_watcher.Poll())
       ReloadProgram();
@@ -187,6 +202,10 @@ int main() {
     // models[0] = glm::rotate(models[0], glm::radians(amount), {0, 1, 0});
     UpdateProgramUniforms();
   }
+
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
 
   glfwTerminate();
 

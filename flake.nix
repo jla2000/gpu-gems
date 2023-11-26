@@ -27,7 +27,7 @@
           glfw
           glew
           glm
-          assimp
+          imgui
         ];
         nativeBuildInputs = with pkgs; [
           neovim
@@ -35,7 +35,8 @@
           clang-tools
         ];
         LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath buildInputs}";
-        CPATH = pkgs.lib.makeSearchPathOutput "dev" "include" buildInputs;
+        IMGUI_DIR = "${pkgs.imgui}/include/imgui";
+        CPATH = "${pkgs.lib.makeSearchPathOutput "dev" "include" buildInputs}:${IMGUI_DIR}";
         src = self;
         buildPhase = ''
           cmake .
